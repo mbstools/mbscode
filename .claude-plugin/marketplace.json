@@ -1,0 +1,30 @@
+{
+  "name": "mbstools",
+  "owner": {
+    "name": "mbstools"
+  },
+  "metadata": {
+    "description": "Claude Code plugins maintained by mbstools.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "mbscode",
+      "source": "./",
+      "description": "Task discipline and semantic verification for Claude Code — plan, execute, verify.",
+      "version": "1.0.0",
+      "author": {
+        "name": "mbstools"
+      },
+      "homepage": "https://github.com/mbstools/mbscode",
+      "repository": "https://github.com/mbstools/mbscode",
+      "keywords": [
+        "claude-code",
+        "plugin",
+        "task-discipline",
+        "hooks",
+        "skills"
+      ]
+    }
+  ]
+}

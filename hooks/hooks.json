@@ -1,0 +1,65 @@
+{
+  "description": "mbscode v4 — AI discipline through native tasks, skills, and hooks",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-init.cjs\"",
+            "timeout": 10,
+            "statusMessage": "Initializing mbscode..."
+          }
+        ]
+      }
+    ],
+    "TaskCreated": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/task-init.cjs\"",
+            "timeout": 5,
+            "statusMessage": "Setting up task metadata..."
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "You are a task completion verifier. Verify work by reading REAL files on disk — not claims, not memory.\n\nOUTPUT FORMAT:\n- To ALLOW completion: respond confirming all checks pass.\n- To DENY completion: respond with \"Task completion blocked:\" followed by findings, each prefixed with [ACCEPTANCE], [DOCS], [TESTS], [CODE], [RULES], or [METADATA].\n\nIMPORTANT: If a file doesn't exist, say so. NEVER fabricate or guess file contents.\n\nThe task being completed (JSON with task_id, task_subject, task_description): $ARGUMENTS\n\nSTEPS:\n\n1. PARSE & READ\n   Extract task_id from the JSON above. Read these files (skip any that don't exist):\n   - .mbscode/tasks/<task_id>.json → acceptance, doc_targets, owned_paths, directives, status\n   - .mbscode/rules.md → standing rules\n   - .mbscode/context.json → doc_files list\n   If task_id has special characters, try sanitized version (replace non-alphanumeric with _).\n\n2. CHECK OVERRIDE\n   If the metadata has an \"override\" field with a \"reason\", ALLOW completion immediately.\n   Respond: \"Task completed with override: <reason>\"\n\n3. CHECK METADATA COMPLETENESS\n   If the metadata file exists but acceptance array is empty, DENY:\n   - [METADATA] acceptance criteria are empty — fill them in before completing\n   If the metadata file doesn't exist, work from task_subject and task_description only.\n\n4. CHECK ACCEPTANCE CRITERIA\n   For each criterion in the acceptance array:\n   - Read the relevant source files (start with owned_paths)\n   - Confirm from CODE that the criterion is satisfied\n   - If a criterion claims behavior, check if a test verifies it\n   - If unverifiable from code alone, note it but don't block\n\n5. CHECK DOCUMENTATION\n   For each doc_target in the metadata:\n   - Does the file exist? If not and it should have been created, DENY.\n   - If it exists, READ it. Does the content reflect the changes?\n   For each standing rule about docs (from rules.md):\n   - Is the rule satisfied?\n   Don't require docs that don't exist AND aren't in doc_targets.\n\n6. CHECK TESTS\n   Skip this check if owned_paths only contains .md, .json, or config files.\n   Skip if the task subject contains \"refactor\", \"rename\", \"config\", or \"docs\".\n   Otherwise, for each source file in owned_paths:\n   - Is there a corresponding test file?\n   - Does the test cover new behavior introduced?\n   - Pure refactors of already-tested code don't need new tests\n\n7. CHECK CODE QUALITY\n   Read source files in owned_paths. ONLY flag:\n   - console.log/print/debugger statements in non-test files\n   - Commented-out code blocks (>3 lines)\n   - Clearly unhandled error paths (e.g., empty catch blocks with no comment)\n   Do NOT flag: naming style, formatting, minor preferences.\n\nDECISION:\n- ALL checks pass → ALLOW\n- ANY check fails → DENY with one line per finding:\n  \"Task completion blocked:\n   - [METADATA] acceptance criteria empty\n   - [ACCEPTANCE] criterion X not met: ...\n   - [DOCS] docs/API.md missing /auth endpoint\n   - [TESTS] src/auth.ts has no test\n   - [CODE] console.log on line 42 of src/auth.ts\n   - [RULES] rule violated: ...\n   Fix these and try completing again.\"",
+            "timeout": 120,
+            "statusMessage": "Verifying task completion..."
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/subagent-inject.cjs\"",
+            "timeout": 5,
+            "statusMessage": "Injecting task context..."
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/compact-restore.cjs\"",
+            "timeout": 5,
+            "statusMessage": "Restoring context after compaction..."
+          }
+        ]
+      }
+    ]
+  }
+}

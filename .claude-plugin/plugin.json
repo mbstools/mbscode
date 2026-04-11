@@ -1,0 +1,19 @@
+{
+  "name": "mbscode",
+  "version": "1.0.0",
+  "description": "Task discipline and semantic verification for Claude Code — plan, execute, verify.",
+  "author": {
+    "name": "mbstools"
+  },
+  "homepage": "https://github.com/mbstools/mbscode",
+  "repository": "https://github.com/mbstools/mbscode",
+  "keywords": [
+    "claude-code",
+    "plugin",
+    "task-discipline",
+    "hooks",
+    "skills",
+    "agent-hook",
+    "verification"
+  ]
+}
