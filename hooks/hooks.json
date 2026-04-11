@@ -1,0 +1,78 @@
+{
+  "description": "mbscode v4 — AI discipline through native tasks, skills, and hooks",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/criteria-gate.cjs\"",
+            "timeout": 5,
+            "statusMessage": "Checking acceptance criteria..."
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-init.cjs\"",
+            "timeout": 10,
+            "statusMessage": "Initializing mbscode..."
+          }
+        ]
+      }
+    ],
+    "TaskCreated": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/task-init.cjs\"",
+            "timeout": 5,
+            "statusMessage": "Setting up task metadata..."
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/task-complete-guard.cjs\"",
+            "timeout": 5,
+            "statusMessage": "Checking verification status..."
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/subagent-inject.cjs\"",
+            "timeout": 5,
+            "statusMessage": "Injecting task context..."
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/compact-restore.cjs\"",
+            "timeout": 5,
+            "statusMessage": "Restoring context after compaction..."
+          }
+        ]
+      }
+    ]
+  }
+}
